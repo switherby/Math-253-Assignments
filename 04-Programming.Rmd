@@ -1,6 +1,51 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
 # In-Class Programming Activity, Day 4
 
-Your work goes here ...
+# Shelby Witherby!!!!!!!!!!!!!!!!!!!!!!
+
+
+```{r}
+# Task 1
+
+plot(1, xlim = c(0, 100), ylim = c(0,100), type = "n", xlab = "This is the x axis", ylab = "This is the y axis")
+
+
+# Task 2
+
+x1 <- (c(0,100, 100, 0))
+y1 <- (c(0, 0, 100, 100))
+
+x2 <- (c(0, 100, 100, 0, 0))
+y2 <- (c(0, 0, 100,100, 0))
+
+lines(x1, y1)
+lines(x2, y2, col = "blue", lwd = 7)
+
+# Task 3
+
+angles <- seq(0, 2 * pi, length = 100)
+x3 <- 50 + 20 * cos(angles)
+y3 <- 60 + 20 * sin(angles)
+
+lines(x3, y3)
+# Task 4
+
+x4 <- 50 + 20 * abs(sin(angles)) * cos(angles)
+y4 <- 50 + 20 * abs(sin(angles)) * sin(angles)
+
+polygon(x4, y4)
+
+# Task 5
+# Done above
+
+
+
+
+```
 
 
 
