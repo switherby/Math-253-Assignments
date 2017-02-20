@@ -1,8 +1,43 @@
 # In-Class Programming Activity, Day 6
 
-Your work goes here ...
+# Shelby Witherby
 
 
+# Task 1
+```{r}
+myHistogram <- function(v, fill = "blue") {
+  dnorm(7)
+}
+```
+
+# Task 2
+
+```{r}
+v <- rnorm(10, mean = 100, sd = 1)
+bw <- diff(range(v)) / sqrt(length(v))
+kernel <- function(v, x) {dnorm(v, mean = x, sd = bw)}
+x <- seq(min(v) - 6*bw, max(v) + 6*bw, length = 200)
+Dvals <- outer(v, x, FUN = kernel)
+density <- colSums(Dvals) / nrow(Dvals)
+DensityFrame <- data.frame(x = x, density = density)
+plot(density ~ x, data = DensityFrame, type = "l")
+```
+
+# Task 3
+
+```{r}
+plotdensity <- function(v, xlim = NULL) {
+  v <- rnorm(10, mean = 100, sd = 1)
+  bw <- diff(range(v)) / sqrt(length(v))
+  kernel <- function(v, x) {dnorm(v, mean = x, sd = bw)}
+  x <- seq(min(v) - 6*bw, max(v) + 6*bw, length = 200)
+  Dvals <- outer(v, x, FUN = kernel)
+  density <- colSums(Dvals) / nrow(Dvals)
+  DensityFrame <- data.frame(x = x, density = density)
+  plot(density ~ x, data = DensityFrame, type = "l", xlim = xlim)
+  invisible(DensityFrame)
+}
+```
 
 ## Test statements
 
