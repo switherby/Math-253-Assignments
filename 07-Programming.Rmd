@@ -1,7 +1,55 @@
 # In-Class Programming Activity, Day 7
 
-Your work goes here ...
+# Shelby Witherby
 
+
+1)
+```{r}
+library(mosaicData)
+vals <- rexp(10, rate = 1/100)
+vals
+```
+
+2)
+```{r}
+test200 <- sum(log(dexp(vals, rate = 1/200)))
+test200
+```
+
+3)
+
+```{r}
+LL_exp <- function(rate) {
+  sum(log(dexp(vals, rate = rate)))
+}
+
+LL_exp(1/200)
+```
+
+4)
+
+```{r}
+rates <- seq(1/200, 1/50, length = 200)
+```
+
+5)
+
+```{r}
+results <- sapply(rates, LL_exp)
+```
+
+6) 
+
+```{r}
+plot(results ~ (1/rates))
+```
+
+7)
+
+```{r}
+exp_results <- optimize(LL_exp, lower = 1/200, upper = 1/50, maximum = TRUE)
+exp_results
+```
 
 
 ## Test statements
