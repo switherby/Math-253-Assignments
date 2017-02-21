@@ -37,7 +37,7 @@ data(College)
 college <- read.csv("http://www-bcf.usc.edu/~gareth/ISL/College.csv", header = TRUE)
 college <- College
 #rownames(college)=college[,1]
-View(college)
+#View(college)
 #college = college[,-1]
 #fix(college)
 summary(college)
@@ -50,7 +50,7 @@ college = data.frame(college, Elite)
 summary(college)
 plot(Outstate ~ Elite, data = college)
 ```
-
+# At elite colleges, there is a higher proportion of out of state students. (Hey Mac)
 
 # ISL 2.4.9
 
