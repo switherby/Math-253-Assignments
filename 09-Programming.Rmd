@@ -2,6 +2,106 @@
 
 Your work goes here ...
 
+```{r}
+poker_deck <- c(outer((10*2:14),1:4, '+'))
+```
+
+```{r}
+suits <- function(cards) cards %% 10
+ranks <- function(cards) cards %/% 10
+```
+
+# 1:
+
+```{r}
+is_royal_flush <- function(five_cards){
+  is_straight_flush(five_cards) && min(rank(five_cards)) == 10
+}
+```
+
+# 2:
+
+```{r}
+is_straight_flush <- function(five_cards) {
+  is_flush(five_cards) & is_straight(five_cards)
+}
+```
+
+# 3:
+
+```{r}
+is_four_of_a_kind <- function(five_cards){
+  max(table(ranks(five_cards))) == 4
+}
+```
+
+# 4:
+
+```{r}
+is_full_house <- function(five_cards){
+  counts <- table(ranks(five_cards))
+  max(counts) == 3 & min(counts) == 2
+}
+```
+
+# 5:
+
+```{r}
+is_flush <- function(five_cards){
+  max(table(suits(five_cards))) == 5
+}
+```
+
+# 6:
+
+```{r}
+is_straight <- function(five_cards){
+  max(diff(sort(ranks(five_cards)))) == 1
+}
+```
+
+# 7:
+
+```{r}
+is_three_of_a_kind <- function(five_cards){
+  max(table(ranks(five_cards))) == 3
+}
+```
+
+# 8:
+
+```{r}
+is_two_pair <- function(five_cards) {
+  sum(table(ranks(five_cards)) == 2) == 2
+}
+```
+
+# 9:
+
+```{r}
+is_pair <- function(five_cards){
+  max(table(ranks(five_cards))) == 2
+}
+```
+
+```{r}
+before_draw <- function(...){
+  five_cards <- sample(poker_deck, 5)
+  if (is_royal_flush(five_cards)) return("Is royal flush")
+  if (is_straight_flush(five_cards)) return("Is straight flush")
+  if (is_four_of_a_kind(five_cards)) return("Is four of a kind")
+  if (is_flush(five_cards)) return("Is flush")
+  if (is_straight(five_cards)) return("Is straight")
+  if(is_three_of_a_kind(five_cards)) return("Is three of a kind")
+  if(is_two_pair(five_cards)) return("Is two pair")
+  if(is_pair(five_cards)) return("is pair")
+  return("NOTHING U LOSE")
+}
+```
+
+```{r}
+table(sapply(1:10000, FUN=before_draw))
+```
 
 
 ## Test statements
