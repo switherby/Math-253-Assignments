@@ -1,2 +1,247 @@
 # Topic 2 Exercises: Linear Regression
+# Shelby Witherby
+
+# Computing
+# 3.6
+
+3.6.1
+```{r}
+library(ISLR)
+library(MASS)
+
+```
+
+3.6.2
+```{r}
+data(Boston)
+#fix(Boston)
+```
+
+
+```{r}
+names(Boston)
+lm.fit = lm(medv~lstat, data = Boston)
+attach(Boston) ## ???
+lm.fit = lm(medv~lstat)
+lm.fit
+names(lm.fit)
+coef(lm.fit)
+confint(lm.fit)
+predict(lm.fit, data.frame(lstat = (c(5,10,15))), interval = "confidence")
+predict(lm.fit, data.frame(lstat = (c(5,10,15))), interval = "prediction")
+plot(lstat, medv)
+abline(lm.fit)
+abline(lm.fit, lwd = 3)
+abline(lm.fit, lwd = 3, col = "red")
+plot(lstat, medv, col = "red")
+plot(lstat, medv, pch = 20)
+plot(lstat, medv, pch = "+")
+plot(1:20, 1:20, pch = 1:20)
+par(mfrow = c(2,2))
+plot(lm.fit)
+plot(predict (lm.fit), residuals (lm.fit))
+plot(predict (lm.fit), rstudent (lm.fit))
+plot(hatvalues (lm.fit))
+which.max(hatvalues (lm.fit))
+```
+
+3.6.3
+```{r}
+lm.fit=lm(medv~lstat+age ,data=Boston )
+summary (lm.fit)
+lm.fit=lm(medv~lstat+age ,data=Boston )
+summary (lm.fit)
+
+library(car)
+vif(lm.fit)
+lm.fit1=lm(medv~.-age ,data=Boston )
+summary (lm.fit1)
+lm.fit1=update(lm.fit , ~.-age)
+```
+
+3.6.4
+```{r}
+summary(lm(medv~lstat*age, data = Boston))
+```
+
+3.6.5
+```{r}
+lm.fit2 = lm(medv~lstat+I(lstat^2))
+summary(lm.fit2)
+lm.fit = lm(medv~lstat)
+anova(lm.fit, lm.fit2)
+par(mfrow=c(2,2))
+plot(lm.fit2)
+lm.fit5 = lm(medv~poly(lstat,5))
+summary(lm.fit5)
+summary(lm(medv~log(rm), data=Boston))
+```
+
+3.6.6
+```{r}
+#fix(Carseats)
+names(Carseats)
+lm.fit=lm(Sales~.+Income:Advertising+Price:Age, data=Carseats)
+summary(lm.fit)
+attach(Carseats)
+contrasts(ShelveLoc)
+```
+
+3.6.7
+```{r}
+LoadLibraries=function(){
+  library(ISLR)
+  library(MASS)
+  print("The libraries have been loaded.")
+}
+
+LoadLibraries
+
+```
+
+# 3.7.13
+
+## a
+
+```{r}
+set.seed(1)
+x <- rnorm(100)
+```
+
+## b
+
+```{r}
+eps <- rnorm(100, sd = sqrt(0.25))
+```
+
+## c
+
+```{r}
+y <- -1 + 0.5 * x + eps
+length(y)
+```
+The value of Bo is -1 and B1 is .5
+
+## d
+
+```{r}
+plot(x,y)
+```
+
+It looks like a pretty linear relationship, with some noise/variance.
+
+## e
+
+```{r}
+aFit <- lm(y ~ x)
+summary(aFit)
+```
+
+The p-value is smaller than .05 so we can reject the null hypothesis. 
+
+## f
+
+```{r}
+plot(x,y)
+abline(aFit, col = "red")
+abline(-1, 0.5, col = "blue")
+legend("topleft", c("Least Squares", "Regression"), col = c("red", "blue"), lty = c(1,1))
+```
+
+## g
+
+```{r}
+aFit2 <- lm(y ~ x + I(x^2))
+summary(aFit2)
+```
+
+The p-value is higher than .05, so x^2 is not significant.
+
+
+## h
+
+```{r}
+set.seed(1)
+eps <- rnorm(100, sd = 0.1)
+x <- rnorm(100)
+y <- -1 + 0.5 * x + eps
+plot(x,y)
+fitLessNoise <- lm(y~x)
+summary(fitLessNoise)
+abline(fitLessNoise, col = "red")
+abline(-1, 0.5, col = "blue")
+legend("topleft", c("Least Squares", "Regression"), col = c("red", "blue"), lty = c(1,1))
+```
+
+After decreasing the variance, the coefficients didn't change much. However, the R^2 increased, and the RSS decreased. The two ablines are also much closer together.
+
+## i 
+
+```{r}
+set.seed(1)
+eps <- rnorm(100, sd = 0.6)
+x <- rnorm(100)
+y <- -1 + 0.5 * x + eps
+plot(x,y)
+fitMoreNoise <- lm(y~x)
+summary(fitMoreNoise)
+abline(fitMoreNoise, col = "red")
+abline(-1, 0.5, col = "blue")
+legend("topleft", c("Least Squares", "Regression"), col = c("red", "blue"), lty = c(1,1))
+```
+
+After increasing the variance, the R^2 decreased, and the RSS increased. Also, the two ablines are further apart. 
+
+## j
+
+```{r}
+confint(aFit)
+confint(fitLessNoise)
+confint(fitMoreNoise)
+
+```
+
+As the noise increases, the confidence intervals are wider. With less noise, there is a smaller confidence interval. 
+
+
+# Theory
+
+# Reading Questions
+Pg. 66: The authors state " For these formulas to be strictly valid, we need to assume that the errors for each observation are uncorrelated with common variance. This is clearly not true in Fig. 3.1". This is because the residuals are small for low values of TV, and big for high values of TV.  
+
+Pg. 77: The authors state "we have a very large number of variables. If p >n then there are more coefficients to estimate than obersavations from which to estimate them. In this case we cannot even fit the multiple regression models using least squares". This is because if there is as many (or more) coefficients as cases, we will find a perfect solution (or many solutions) with zero residuals. As such, there is no unique best fit. 
+
+# 3.7.3
+# a)
+i. NOT correct. If we have a fixed value of IQ and GPA, the difference with respect to sex is (35 - 10*GPA) for a female. As such, it is NOT correct to say that males earn more on average than females. The earning gap is dependent on GPA. 
+
+ii. NOT correct. As stated above, if we have a fixed value of IQ and GPA, the difference with respect to sex is (35 - 10*GPA) for a female. As such, it is NOT correct to say that males earn more on average than females. The earning gap is dependent on GPA.
+
+iii. CORRECT. For a fixed value of IQ and GPA, males earn more than females if their GPA is above a 3.5. 
+
+# b)
+```{r}
+50 + (20*(4.0)) + (.07*110) + (35*1) + (.01*4.0*110) - (10*4.0*1)
+```
+$137.1
+
+# c)
+FALSE. The coefficient for the GPA/IQ interaction term has different units than other coefficients, so we can't just compare the number. For example, the GPAxIQ interaction term is .01 per GPA unit x IQ unit. There can still be a strong interaction effect if we have a large enough GPA or IQ. If we had an IQ of 110 and a GPA of 4.0, the interaction term would be 44. If we had an IQ of 110 and a GPA of 2.0, the interaction would be 22. That's pretty significant!
+
+# 3.7.4
+
+# a)
+For the training data, I expect the cubic regression to have the same or lower RSS than the linear regression.
+
+# b)
+For the testing data, I expect the cubic regression to have a larger RSS than the linear regression. There will be a higher variance from the true linear relationship, and as such, larger residuals. As well as higher bias.
+
+# c) 
+There isn't enough information to tell. The error is a result of bias and variance -- the more flexible (cubic) model will have less bias but could have more variance. As such, it is impossible to determine what the error will be.
+
+# d)
+There isn't enough information to tell. The error is a result of bias and variance -- the more flexible (cubic) model will have less bias but could have more variance. As such, it is impossible to determine what the error will be. 
+
+
+
 
