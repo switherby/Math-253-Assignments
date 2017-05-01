@@ -2,6 +2,77 @@
 
 Your work goes here ...
 
+# The logistic function
+
+```{r}
+library(ISLR)
+```
+
+
+```{r}
+logistic <- function(x) exp(x) / (1 + exp(x))
+```
+
+# Linear Combinations
+
+```{r}
+#linear_combine(data = Default, coefs = c(intercept = 3, balance = .00001, income = -.0002))
+  
+#result <- 0 
+#for (nm in names(coefs)) {
+ # if (nm == "intercept") {
+  #  result <- result + coefs[[nm]]
+  #} else {
+   # result <- result + coefs[[nm]] * data[[nm]]
+  #}
+#}
+
+
+linear_combine <- function(data = NULL, coefs = NULL) {
+  if(is.null(data))
+    stop("give  me data")
+  if(is.null(coefs))
+    stop("give me coefficients")
+  result <- 0
+  for(nm in names(coefs)){
+    if(nm == "intercept") {
+      result <- result + coefs[[nm]] + rep(0, nrow(data))
+    } else {
+      if (! nm %in% names(data))
+        stop("Variable, nm, in coefficients but not in data")
+      result <- result + coefs[[nm]] * data[[nm]]
+    }
+  }
+  result
+}
+```
+
+# Probabilities
+
+```{r}
+LL_logistic <- function(data = NULL, coefs = NULL, outcome){
+  probs <- logistic(linear_combine(data = data, coefs = coefs))
+  likelihoods <- ifelse(outcome, probs, 1-probs)
+  sum(log(likelihoods))
+}
+```
+
+
+```{r}
+LL_logistic(data=Default, coefs = c(intercept = 1, income = -.0001), outcome = Default$default == "Yes")
+```
+
+# Optimize
+
+```{r}
+fun_to_minimize <- function(coefs){
+  - LL_logistic(data = Default, coefs = coefs, outcome = Default$default=="Yes")
+  
+}
+best_coefs <- optim(c(intercept = 1, income = 0.0001), fun_to_minimize)
+
+glm(default == "Yes" ~ income, data = Default, family = "binomial")
+```
 
 
 ## Test statements
