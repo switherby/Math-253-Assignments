@@ -1,8 +1,64 @@
 # In-Class Programming Activity, Day 13
 
-Your work goes here ...
+```{r}
 
+library(mosaicData)
+library(ggplot2)
+library(ISLR)
 
+```
+
+# the k sets
+
+```{r}
+k <- 10
+sets <- (1:51 %% k) + 1
+```
+
+```{r}
+k_fold1 <- function(formula, method = lm, data = mtcars, predfun = predict, k=10){
+  mspe <- numeric(k)
+  sets <- (1:nrow(data) %% k) + 1
+  for (i in 1:k) {
+    test_cases <- i == sets
+    For_Testing <- data[test_cases,]
+    For_Training <- data[! test_cases,]
+    mod <- lm(mpg ~ hp + wt + am, data = For_Training)
+    pred_vals <- predict(mod, newdata = For_Testing)
+    mspe[i] <- mean((For_Testing[["mpg"]] - pred_vals)^2)
+  }
+  return(mean(mspe))
+}
+```
+
+# trying out your function
+
+```{r}
+mod <- lm(mpg ~ hp + wt + am, data = mtcars)
+mean(resid(mod)^2)
+```
+
+# generalizing the function
+
+```{r}
+k_fold <- function(formula, method = lm, data = mtcars, predfun = predict, k = 10) {
+  mspe <- numeric(k)
+  sets <- (1:nrow(data) %% k) + 1
+  for (i in 1:k){
+    test_cases <- i == sets
+    For_Testing <- data[test_cases,]
+    For_Training <- data[! test_cases,]
+    mod <- method(formula, data = For_Training)
+    pred_vals <- predfun(mod, newdata = For_Testing)
+    mspe[i] <- mean((For_Testing[[as.character(formula[[2]])]] - pred_vals)^2)
+  }
+  return(mean(mspe))
+}
+```
+
+```{r}
+k_fold(formula = mpg ~ hp + wt + am, data = mtcars)
+```
 
 ## Test statements
 
