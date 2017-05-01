@@ -1,6 +1,43 @@
 # In-Class Programming Activity, Day 14
 
-Your work goes here ...
+```{r}
+library(mosaicData)
+library(ggplot2)
+library(ISLR)
+library(glmnet)
+```
+
+```{r}
+GenCont <- read.csv("http://tiny.cc/dcf/GenCont.csv")
+```
+
+# Comparing OLS to ridge
+
+```{r}
+compare_ols_ridge <- function(responses = GenCont[,1], predictors = GenCont[, -1], lambda = 1){
+  training_inds <- sample(1:length(responses), size = floor(length(responses)/2))
+  resp_train <- responses[training_inds]
+  pred_train <- predictors[training_inds,]
+  resp_test <- responses[-training_inds]
+  pred_test <- predictors[-training_inds,]
+  ols_mod <- lm(resp_train ~ as.matrix(pred_train))
+  ridge_mod <- glmnet(as.matrix(pred_train), resp_train, alpha = 0, lambda = lambda)
+  ols_in <- mean((resp_train - predict(ols_mod))^2)
+  ols_out <- mean((resp_test - predict(ols_mod, newx = pred_test))^2)
+  ridge_in <- mean((resp_train - predict(ridge_mod, newx = as.matrix(pred_train)))^2)
+  ridge_out <- mean((resp_test - predict(ridge_mod, newx = as.matrix(pred_test)))^2)
+  return(c(lambda = lambda, ols_in = ols_in, ols_out = ols_out, ridge_in = ridge_in, ridge_out = ridge_out))
+}
+
+set.seed(1)
+Shrink_results <- compare_ols_ridge(responses = GenCont[,1], predictors = GenCont[,-1], lambda = 1)
+```
+
+# Exploring Lambda
+
+```{r}
+compare_ols_ridge(GenCont[,1], GenCont[,-1], lambda = 1)
+```
 
 
 
