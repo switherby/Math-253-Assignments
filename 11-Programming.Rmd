@@ -1,7 +1,54 @@
 # In-Class Programming Activity, Day 11
 
-Your work goes here ...
+# Shelby Witherby
 
+```{r}
+library(mosaicData)
+library(ggplot2)
+library(ISLR)
+```
+
+# Matrices and their inverses
+
+```{r}
+Sigma <- matrix(c(1,-.7, -.7, 1), nrow = 2, ncol = 2)
+Sigma_inv <- solve(Sigma)
+```
+
+# Matrix Compositions
+
+```{r}
+A <- chol(Sigma)
+```
+
+# ORthogonal vectos and matrices
+
+
+```{r}
+x1 <- rnorm(10)
+x2 <- rnorm(10)
+x1 <- cbind(x1)
+x2 <- cbind(x2)
+X <- cbind(x1, x2)
+```
+
+```{r}
+w1 <- rnorm(10000)
+w2 <- rnorm(10000)
+W <- cbind(w1, w2)
+W_cov <- t(W) %*% W / nrow(W)
+```
+# Generating correlated random vectors
+
+```{r}
+A_inv <- col(solve(Sigma))
+
+Y <- X %*% A 
+t(Y) %*% Y / nrow(Y)
+Y <- W %*% A
+t(Y) %*% Y / nrow(Y)
+plot(Y[,1], Y[,2], col = rgb(0,0,0,.05))
+```
 
 
 ## Test statements
