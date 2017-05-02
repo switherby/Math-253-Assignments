@@ -965,7 +965,7 @@ lda.fit = lda(mpg01 ~ acceleration + weight + displacement +cylinders , data = A
 lda.pred = predict(lda.fit, Auto.test)
 mean(lda.pred$class != mpg01.test)</code></pre>
 <pre><code>## [1] 0.1208791</code></pre>
-<p>12.5% error rate</p>
+<p>12.1% error rate</p>
 <ol start="5" style="list-style-type: lower-alpha">
 <li></li>
 </ol>
@@ -973,7 +973,7 @@ mean(lda.pred$class != mpg01.test)</code></pre>
 qda.pred = predict(qda.fit, Auto.test)
 mean(qda.pred$class != mpg01.test)</code></pre>
 <pre><code>## [1] 0.1208791</code></pre>
-<p>11.957% error rate</p>
+<p>12.1% error rate</p>
 <ol start="6" style="list-style-type: lower-alpha">
 <li></li>
 </ol>
@@ -983,7 +983,7 @@ glm.pred = rep(0, length(glm.probs))
 glm.pred[glm.probs &gt; 0.5] = 1
 mean(glm.pred != mpg01.test)</code></pre>
 <pre><code>## [1] 0.1428571</code></pre>
-<p>14.13% error rate</p>
+<p>14.28% error rate</p>
 <ol start="7" style="list-style-type: lower-alpha">
 <li></li>
 </ol>
@@ -1015,7 +1015,7 @@ mean(knn.pred != mpg01.test)</code></pre>
 knn.pred = knn(train.X, test.X, train.mpg01, k = 200)
 mean(knn.pred != mpg01.test)</code></pre>
 <pre><code>## [1] 0.5494505</code></pre>
-<p>When k=1, there is 11.413% error When k=10, there is 11.957% error When k=100, there is 5.4348% error When k=200, there is 5.4348% error</p>
+<p>When k=1, there is 11.5% error When k=10, there is 12.1% error When k=100, there is 5.5% error When k=200, there is 5.5% error</p>
 <p>As such, around 100 seems to be the best K.</p>
 <p>4.7.13</p>
 <pre class="r"><code>library(MASS)
@@ -2045,16 +2045,20 @@ Boston.train = Boston[Btrain, ]
 Boston.test = Boston[Btest, ]
 crime01.test = crime01[Btest]</code></pre>
 <p>Logistic</p>
-<pre class="r"><code>#glm.fit = glm(crime01 ~ . - crime01 - crim, data = Boston.train, family = binomial)
-#glm.probs = predict(glm.fit, Boston.test, type = &quot;response&quot;)
-#glm.pred = rep(0, length(glm.probs))
-#glm.pred[glm.probs &gt; 0.5] = 1
-#mean(glm.pred != crime01.test)
-#glm.fit = glm(crime01 ~ . - crime01 - crim - chas - tax, data = Boston.train, family = binomial)
-#glm.probs = predict(glm.fit, Boston.test, type = &quot;response&quot;)
-#glm.pred = rep(0, length(glm.probs))
-#glm.pred[glm.probs &gt; 0.5] = 1
-#mean(glm.pred != crime01.test)</code></pre>
+<pre class="r"><code>glm.fit = glm(crime01 ~ . - crime01 - crim, data = Boston.train, family = binomial)</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre class="r"><code>glm.probs = predict(glm.fit, Boston.test, type = &quot;response&quot;)
+glm.pred = rep(0, length(glm.probs))
+glm.pred[glm.probs &gt; 0.5] = 1
+mean(glm.pred != crime01.test)</code></pre>
+<pre><code>## [1] 0.1818182</code></pre>
+<pre class="r"><code>glm.fit = glm(crime01 ~ . - crime01 - crim - chas - tax, data = Boston.train, family = binomial)</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre class="r"><code>glm.probs = predict(glm.fit, Boston.test, type = &quot;response&quot;)
+glm.pred = rep(0, length(glm.probs))
+glm.pred[glm.probs &gt; 0.5] = 1
+mean(glm.pred != crime01.test)</code></pre>
+<pre><code>## [1] 0.1857708</code></pre>
 <p>18.18% error for complex models, 18.58% error for simple models</p>
 <p>LDA</p>
 <pre class="r"><code>lda.fit = lda(crime01 ~ . - crime01 - crim, data = Boston.train)

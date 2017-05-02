@@ -41,7 +41,7 @@ lda.fit = lda(mpg01 ~ acceleration + weight + displacement +cylinders , data = A
 lda.pred = predict(lda.fit, Auto.test)
 mean(lda.pred$class != mpg01.test)
 ```
-12.5% error rate
+12.1% error rate
 
 (e)
 ```{r}
@@ -49,7 +49,7 @@ qda.fit = qda(mpg01 ~ cylinders + weight + displacement , data = Auto.train)
 qda.pred = predict(qda.fit, Auto.test)
 mean(qda.pred$class != mpg01.test)
 ```
-11.957% error rate
+12.1% error rate
 
 (f)
 ```{r}
@@ -59,7 +59,7 @@ glm.pred = rep(0, length(glm.probs))
 glm.pred[glm.probs > 0.5] = 1
 mean(glm.pred != mpg01.test)
 ```
-14.13% error rate
+14.28% error rate
 
 (g)
 ```{r}
@@ -82,10 +82,10 @@ mean(knn.pred != mpg01.test)
 knn.pred = knn(train.X, test.X, train.mpg01, k = 200)
 mean(knn.pred != mpg01.test)
 ```
-When k=1, there is 11.413% error
-When k=10, there is 11.957% error
-When k=100, there is 5.4348% error
-When k=200, there is 5.4348% error
+When k=1, there is 11.5% error
+When k=10, there is 12.1% error
+When k=100, there is 5.5% error
+When k=200, there is 5.5% error
 
 As such, around 100 seems to be the best K.
 
@@ -107,16 +107,16 @@ crime01.test = crime01[Btest]
 
 Logistic
 ```{r}
-#glm.fit = glm(crime01 ~ . - crime01 - crim, data = Boston.train, family = binomial)
-#glm.probs = predict(glm.fit, Boston.test, type = "response")
-#glm.pred = rep(0, length(glm.probs))
-#glm.pred[glm.probs > 0.5] = 1
-#mean(glm.pred != crime01.test)
-#glm.fit = glm(crime01 ~ . - crime01 - crim - chas - tax, data = Boston.train, family = binomial)
-#glm.probs = predict(glm.fit, Boston.test, type = "response")
-#glm.pred = rep(0, length(glm.probs))
-#glm.pred[glm.probs > 0.5] = 1
-#mean(glm.pred != crime01.test)
+glm.fit = glm(crime01 ~ . - crime01 - crim, data = Boston.train, family = binomial)
+glm.probs = predict(glm.fit, Boston.test, type = "response")
+glm.pred = rep(0, length(glm.probs))
+glm.pred[glm.probs > 0.5] = 1
+mean(glm.pred != crime01.test)
+glm.fit = glm(crime01 ~ . - crime01 - crim - chas - tax, data = Boston.train, family = binomial)
+glm.probs = predict(glm.fit, Boston.test, type = "response")
+glm.pred = rep(0, length(glm.probs))
+glm.pred[glm.probs > 0.5] = 1
+mean(glm.pred != crime01.test)
 ```
 18.18% error for complex models, 18.58% error for simple models
 
