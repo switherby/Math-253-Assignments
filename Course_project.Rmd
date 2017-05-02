@@ -1,0 +1,158 @@
+---
+title: "Course_project"
+author: "Shelby Witherby"
+date: "4/27/2017"
+output: html_document
+---
+
+# Members: Aidan Teppema and Shelby Witherby
+
+Our presentation slideshow can be viewed at:
+https://docs.google.com/a/macalester.edu/presentation/d/1BwfHSIkovhlIXollfcJ3orUrouD_FgbF6_zkPJhYdDQ/edit?usp=sharing 
+
+```{r}
+
+# Setting up the data
+library(readr)
+library(glmnet)
+Energy_Census_and_Economic_Data_US_2010_2014_1_1_1_ <- read_csv("~/Math-253-Assignments/Energy Census and Economic Data US 2010-2014 (1) (1) (1).csv")
+
+ECED <- Energy_Census_and_Economic_Data_US_2010_2014_1_1_1_
+max(ECED$TotalC2010)
+ECEDS = ECED[1:51,]
+
+# Matrix for lasso
+
+X = as.matrix(data.frame(ECEDS$TotalC2010,ECEDS$TotalPrice2010,
+        ECEDS$BiomassC2010,
+        ECEDS$CoalC2010,ECEDS$CoalPrice2010,
+        ECEDS$ElecC2010,ECEDS$ElecPrice2010,
+        ECEDS$GeoC2010,
+        ECEDS$HydroC2010,
+        ECEDS$NatGasC2010,
+        ECEDS$LPGC2010,ECEDS$LPGPrice2010))
+
+# Alpha = 1 for lasso only, can blend with ridge penalty down to alpha = 0 for ridge regression
+
+glmmod <- glmnet(X, ECEDS$GDP2010, alpha=1)
+
+# Plot variable coefficients vs. shrinkage parameter lambda
+
+plot(glmmod, xvar="lambda")
+glmmod
+
+coef(glmmod)[, 10]
+
+cv.glmmod <- cv.glmnet(X, ECEDS$GDP2010, alpha=1)
+plot(cv.glmmod)
+
+(best.lambda <- cv.glmmod$lambda.min)
+```
+
+
+```{r}
+#install.packages('rpart.plot')
+library(dplyr)
+library(tidyr)
+
+
+```
+
+```{r}
+#install.packages('randomForest')
+```
+
+```{r setup, include=FALSE}
+library(ISLR)
+library(rpart)
+
+library(rpart.plot)
+library(randomForest)
+energyGDP <- read.csv("~/Comp-110-Assignments/to upload/Energy Census and Economic Data US 2010-2014 (1) (1) (1).csv")
+
+```
+
+```{r}
+mod1 <- rpart(GDP2010 ~ ElecC2010 + GeoC2010, data = energyGDP, cp = .0001)
+prp(mod1)
+mod1
+mod2 <- rpart(GDP2011 ~ ElecC2011 + GeoC2011, data = energyGDP, cp = .0001)
+prp(mod2)
+
+mod3 <- rpart(GDP2012 ~ ElecC2012 + GeoC2012, data = energyGDP, cp = .0001)
+prp(mod3)
+
+mod4 <- rpart(GDP2013 ~ ElecC2013 + GeoC2013, data = energyGDP, cp = .0001)
+prp(mod4)
+
+newGDP <- energyGDP %>%
+  select(starts_with("GDP20"), StateCodes) %>%
+  gather(key = year, value = GDP, - StateCodes) %>%
+  filter(grepl("[0-3]{4}$", year)) %>%
+  mutate(year = as.numeric(gsub("[A-Za-z]", "", year)))
+
+newElecC <- energyGDP %>%
+  select(starts_with("ElecC"), StateCodes) %>%
+  gather(key = year, value = ElecC, - StateCodes) %>%
+  filter(grepl("[0-3]{4}$", year)) %>%
+  mutate(year = as.numeric(gsub("[A-Za-z]", "", year)))
+
+newGeoC <- energyGDP %>%
+  select(starts_with("GeoC"), StateCodes) %>%
+  gather(key = year, value = GeoC, - StateCodes) %>%
+  filter(grepl("[0-3]{4}$", year)) %>%
+  mutate(year = as.numeric(gsub("[A-Za-z]", "", year)))
+
+
+```
+
+
+```{r}
+finalTable <- left_join(newGDP, newElecC, by = c("StateCodes", "year")) %>%
+  left_join(., newGeoC, by = c("StateCodes", "year"))
+```
+
+
+```{r}
+mod5 <- rpart(GDP ~ ElecC + GeoC, data = finalTable, cp = .001)
+prp(mod5)
+
+```
+
+```{r}
+testGDP <- energyGDP %>%
+  select(starts_with("GDP20"), StateCodes) %>%
+  gather(key = year, value = GDP, - StateCodes) %>%
+  filter(grepl("2014$", year)) %>%                # extract 2010-2013
+  mutate(year = as.numeric(gsub("[A-Za-z]", "", year))) 
+
+testElecC <- energyGDP %>%
+  select(starts_with("ElecC"), StateCodes) %>%
+  gather(key = year, value = ElecC, - StateCodes) %>%
+  filter(grepl("2014$", year)) %>%
+  mutate(year = as.numeric(gsub("[A-Za-z]", "", year)))
+
+testGeoC <- energyGDP %>%
+  select(starts_with("GeoC"), StateCodes) %>%
+  gather(key = year, value = GeoC, - StateCodes) %>%
+  filter(grepl("2014$", year)) %>%
+  mutate(year = as.numeric(gsub("[A-Za-z]", "", year)))
+```
+
+```{r}
+testTable <- left_join(testGDP, testElecC, by = c("StateCodes", "year")) %>%
+  left_join(., testGeoC, by = c("StateCodes", "year"))
+```
+
+```{r}
+#View(testTable)
+```
+
+```{r}
+pred <- predict(mod5, testTable)
+```
+
+```{r}
+#pred - testTable[testGDP]
+mean(pred/testTable$GDP)
+```
