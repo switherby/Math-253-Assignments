@@ -27,86 +27,66 @@
 
 (a)
 ```{r}
-college_file_name="/home/local/MAC/ateppema/Math 253 Assignments/College.csv"
-College=read.csv(college_file_name)
-
-train.size = dim(College)[1] / 2
-traincol = sample(1:dim(College)[1], train.size)
-testcol = -traincol
-College.train = College[traincol, ]
-College.test = College[testcol, ]
-
-College.train
-College.test
+model_formula <- Apps ~.
+library(ISLR)
+data(College)
+names(College)
+College$Apps <- log10(College$Apps)
+training_cases <- sample(1:nrow(College), size = nrow(College)/2)
+Training <- College[training_cases,]
+Testing <- College[ - training_cases,]
 ```
 
 (b)
 ```{r}
-lm.col=lm(Apps~.,data=College.train)
-#lm.pred.col = predict.lm(lm.col, College.test)
-#mean((College.test[, "Apps"] - lm.pred.col)^2)
+mod_b <- lm(model_formula, data = Training)
+preds <- predict(mod_b, newdata = Testing)
+mean((Testing$Apps - preds)^2)
 ```
 Test RSS = 1,088,625
 
 (c)
 ```{r}
-Xtraincoll = model.matrix(Apps~., data=College.train)
-Xtestcoll = model.matrix(Apps~., data=College.test)
-
 library(glmnet)
 
-grid = 10 ^ seq(4, -2, length=100)
-ridge.mod.col = cv.glmnet(Xtraincoll, College.train[, "Apps"], alpha=0, lambda=grid, thresh=1e-12)
+Training_MM <- model.matrix(model_formula, data = Training)
+mod_c <- cv.glmnet(Training_MM , Training$Apps, alpha = 0)
+mod_c$lambda.min
 
-lambda.col = ridge.mod.col$lambda.min
-lambda.col
-
-ridge.pred.col = predict(ridge.mod.col, newx=Xtestcoll, s=lambda.col)
-mean((College.test[, "Apps"] - ridge.pred.col)^2)
+Testing_MM <- model.matrix(model_formula, data = Testing)
+preds <- predict(mod_c, newx = Testing_MM, s = mod_c$lambda.min)
+mean((Testing$Apps - preds)^2)
 ```
-Test RSS = 1,088,612 (slightly smaller than lm model)
+
 
 (d)
 ```{r}
-glm.mod.col <- glmnet(Xtraincoll, College.train$Apps, alpha=1)
-
-plot(glm.mod.col, xvar="lambda")
-glm.mod.col
-
-coef(glm.mod.col)[, 10]
-
-cv.glmmod.col <- cv.glmnet(Xtraincoll, College.train$Apps, alpha=1)
-plot(cv.glmmod.col)
-
-(best.lambda.col <- cv.glmmod.col$lambda.min)
-
-lasso.pred.col = predict(glm.mod.col, newx=Xtestcoll, s=best.lambda.col)
-mean((College.test[, "Apps"] - lasso.pred.col)^2)
+library(glmnet)
+Training_MM <- model.matrix(model_formula, data = Training)
+mod_d <- cv.glmnet(Training_MM , Training$Apps, alpha = 1)
+mod_d$lambda.min
+Testing_MM <- model.matrix(model_formula, data = Testing)
+preds <- predict(mod_d, newx = Testing_MM, s = mod_d$lambda.min)
+mean((Testing$Apps - preds)^2)
 ```
-5 non-zero coefficients
-RSS = 1,037,740 (lowest yet!!!!)
+
 
 (e)
 ```{r}
-#install.packages("pls")
 library(pls)
-
-#pcr.fit = pcr(Apps~.,data=College.test, scale=T, validation="CV")
-#validationplot(pcr.fit, val.type="MSEP")
-
-#pcr.pred = predict(pcr.fit, College.test, ncomp=10)
-#mean((College.test[, "Apps"] - data.frame(pcr.pred.col))^2)
+mod_e <- pcr(model_formula, data = Training, validation = "CV")
+validationplot(mod_e, val.type = "MSEP")
+preds <- predict(mod_e,  newdata = Testing, ncomp = 4)
+mean((Testing$Apps - preds)^2)
 ```
-RSS = 1,357,302 (largest yet)
-
 (f)
 ```{r}
-#pls.fit.col = plsr(Apps~., data=College.train, scale=T, validation="CV")
-#validationplot(pls.fit.col, val.type="MSEP")
-#pls.pred.col = predict(pls.fit.col, College.test, ncomp=10)
-#mean((College.test[, "Apps"] - data.frame(pls.pred.col))^2)
+library(pls)
+mod_f <- plsr(model_formula, data = Training, validation = "CV")
+validationplot(mod_f, val.type = "MSEP")
+preds <- predict(mod_f,  newdata = Testing, ncomp = 4)
+mean((Testing$Apps - preds)^2)
 ```
-RSS = 1,144,453
 
 (g)
-Most of the test errors are similar, but lasso seems to be the best in this situation. It seems we can fit the data pretty accurately, with PCR being the worst predictor.
+The average square prediction error is ~ 140,000 for linear regression. The result depends highly on what is selected for in the training set. Additionally, there is a significant outlier in College Apps. 
