@@ -1,2 +1,112 @@
 # Topic 6 Exercises: Selecting Model Terms
 
+# Theory
+
+6.8.1
+
+(a) Best subset has smallest training RSS since it finds the absolute best model for that data, and therefore has the smallest residuals.
+(b) It is hard to know for sure which will have the smallest test RSS but it is most likely that it is best subset again, since it considers all possible models.
+(c) i. True
+    ii. True
+    iii. False
+    iv. False
+    v. False
+
+6.8.2.
+
+(a) The lasso, relative to least squares, is:
+    iii. Less flexible and will give improved prediction accuracy when its increase in bias is less than its decrease in variance.
+(b) The ridge regression, relative to least squares, is:
+    iii. Same as lasso (above)
+(c) Non-linear methods, relative to least squares, are:
+    ii. More flexible and hence will give improved prediction accuracy when its increase in variance is less than its decrease in bias.
+
+# Applied
+
+6.8.9
+
+(a)
+```{r}
+college_file_name="/home/local/MAC/ateppema/Math 253 Assignments/College.csv"
+College=read.csv(college_file_name)
+
+train.size = dim(College)[1] / 2
+traincol = sample(1:dim(College)[1], train.size)
+testcol = -traincol
+College.train = College[traincol, ]
+College.test = College[testcol, ]
+
+College.train
+College.test
+```
+
+(b)
+```{r}
+lm.col=lm(Apps~.,data=College.train)
+#lm.pred.col = predict.lm(lm.col, College.test)
+#mean((College.test[, "Apps"] - lm.pred.col)^2)
+```
+Test RSS = 1,088,625
+
+(c)
+```{r}
+Xtraincoll = model.matrix(Apps~., data=College.train)
+Xtestcoll = model.matrix(Apps~., data=College.test)
+
+library(glmnet)
+
+grid = 10 ^ seq(4, -2, length=100)
+ridge.mod.col = cv.glmnet(Xtraincoll, College.train[, "Apps"], alpha=0, lambda=grid, thresh=1e-12)
+
+lambda.col = ridge.mod.col$lambda.min
+lambda.col
+
+ridge.pred.col = predict(ridge.mod.col, newx=Xtestcoll, s=lambda.col)
+mean((College.test[, "Apps"] - ridge.pred.col)^2)
+```
+Test RSS = 1,088,612 (slightly smaller than lm model)
+
+(d)
+```{r}
+glm.mod.col <- glmnet(Xtraincoll, College.train$Apps, alpha=1)
+
+plot(glm.mod.col, xvar="lambda")
+glm.mod.col
+
+coef(glm.mod.col)[, 10]
+
+cv.glmmod.col <- cv.glmnet(Xtraincoll, College.train$Apps, alpha=1)
+plot(cv.glmmod.col)
+
+(best.lambda.col <- cv.glmmod.col$lambda.min)
+
+lasso.pred.col = predict(glm.mod.col, newx=Xtestcoll, s=best.lambda.col)
+mean((College.test[, "Apps"] - lasso.pred.col)^2)
+```
+5 non-zero coefficients
+RSS = 1,037,740 (lowest yet!!!!)
+
+(e)
+```{r}
+#install.packages("pls")
+library(pls)
+
+#pcr.fit = pcr(Apps~.,data=College.test, scale=T, validation="CV")
+#validationplot(pcr.fit, val.type="MSEP")
+
+#pcr.pred = predict(pcr.fit, College.test, ncomp=10)
+#mean((College.test[, "Apps"] - data.frame(pcr.pred.col))^2)
+```
+RSS = 1,357,302 (largest yet)
+
+(f)
+```{r}
+#pls.fit.col = plsr(Apps~., data=College.train, scale=T, validation="CV")
+#validationplot(pls.fit.col, val.type="MSEP")
+#pls.pred.col = predict(pls.fit.col, College.test, ncomp=10)
+#mean((College.test[, "Apps"] - data.frame(pls.pred.col))^2)
+```
+RSS = 1,144,453
+
+(g)
+Most of the test errors are similar, but lasso seems to be the best in this situation. It seems we can fit the data pretty accurately, with PCR being the worst predictor.
