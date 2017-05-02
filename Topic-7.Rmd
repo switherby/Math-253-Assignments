@@ -1,2 +1,89 @@
 # Topic 7 Exercises: Nonlinear regression
 
+# Programming
+
+7.9.11
+
+(a)
+```{r}
+set.seed(1)
+X1 = rnorm(100)
+X2 = rnorm(100)
+```
+
+(b)
+```{r}
+Y = 1.2 + 3 * X1 + 4.2 * X2
+```
+
+(c)
+```{r}
+a = Y - 3 * X1
+beta2 = lm(a ~ X2)$coef[2]
+beta2
+```
+beta2 = 4.2
+
+(d)
+```{r}
+b = Y - 4 * X2
+beta1 = lm(a ~ X1)$coef[2]
+beta1
+```
+beta1 = -0.004453622  
+
+(e)
+```{r}
+beta0 = 1.2
+for (i in 1:1000) {
+    a = Y - beta1[i] * X1
+    beta2[i] = lm(a ~ X2)$coef[2]
+    a = Y - beta2[i] * X2
+    lm.fit = lm(a ~ X1)
+    if (i < 1000) {
+        beta1[i + 1] = lm.fit$coef[2]
+    }
+    beta0[i] = lm.fit$coef[1]
+}
+plot(1:1000, beta0, type = "l", xlab = "iteration", ylab = "betas", ylim = c(-1, 
+    6), col = "green")
+lines(1:1000, beta1, col = "red")
+lines(1:1000, beta2, col = "blue")
+legend("center", c("beta0", "beta1", "beta2"), lty = 1, col = c("green", "red", 
+    "blue"))
+```
+The loop estimates beta0 to be 1.2 always, beta1 to be 0 at iteration 0 and then 3 after that, beta2 to be 4.2 always.
+
+(f)
+```{r}
+lm.fit = lm(Y ~ X1 + X2)
+plot(1:1000, beta0, type = "l", xlab = "iteration", ylab = "betas", ylim = c(-1, 
+    6), col = "green")
+lines(1:1000, beta1, col = "red")
+lines(1:1000, beta2, col = "blue")
+abline(h = lm.fit$coef[1], lty = "dashed", lwd = 3, col = rgb(0, 0, 0, alpha = 0.4))
+abline(h = lm.fit$coef[2], lty = "dashed", lwd = 3, col = rgb(0, 0, 0, alpha = 0.4))
+abline(h = lm.fit$coef[3], lty = "dashed", lwd = 3, col = rgb(0, 0, 0, alpha = 0.4))
+legend("center", c("beta0", "beta1", "beta2", "multiple regression"), lty = c(1, 
+    1, 1, 2), col = c("green", "red", "blue", "black"))
+```
+
+(g)
+One iteration was enough to get the correct results in this simple example.
+
+# Theory 
+
+7.9.3
+(In notebook)
+It looks quadratic with the vertext at x = 1.
+
+7.9.4
+(In notebook)
+No apparent curve
+
+7.9.5
+(a) As lambda goes to infinity, g2 will have the smaller training RSS because the higher polynomial that it multiplies will fit the training data better
+(b) As lambda goes to infinity, g1 will have the smaller test RSS because the higher polynomial that it multiplies will fit the training data better and not apply to the test data as well
+(c) When lambda = 0, g1 and g2 will have the same training and test RSS because the zero will negate the difference in polynomial
+
+
