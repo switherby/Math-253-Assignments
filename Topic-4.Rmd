@@ -1,2 +1,185 @@
 # Topic 4 Exercises: Classification
 
+# Programming Assignment
+
+4.7.11
+
+(a)
+```{r}
+library(ISLR)
+Auto
+Auto$mpg01=0
+Auto$mpg01[Auto$mpg < 23]=1
+list(Auto$mpg01)
+```
+
+(b)
+```{r}
+plot(Auto$cylinders,Auto$mpg01)
+plot(Auto$displacement,Auto$mpg01)
+plot(Auto$horsepower,Auto$mpg01)
+plot(Auto$weight,Auto$mpg01)
+plot(Auto$acceleration,Auto$mpg01)
+plot(Auto$year,Auto$mpg01)
+plot(Auto$origin,Auto$mpg01)
+```
+Based on scatter plots of the various features versus our new dummy variable mpg01, it seems as though weight is the best predictor.
+
+(c)
+```{r}
+train = (Auto$year%%2 == 0)  # if the year is even
+test = !train
+Auto.train = Auto[train, ]
+Auto.test = Auto[test, ]
+mpg01.test = Auto.test$mpg01
+```
+
+(d)
+```{r}
+library(MASS)
+lda.fit = lda(mpg01 ~ acceleration + weight + displacement +cylinders , data = Auto.train)
+lda.pred = predict(lda.fit, Auto.test)
+mean(lda.pred$class != mpg01.test)
+```
+12.5% error rate
+
+(e)
+```{r}
+qda.fit = qda(mpg01 ~ cylinders + weight + displacement , data = Auto.train)
+qda.pred = predict(qda.fit, Auto.test)
+mean(qda.pred$class != mpg01.test)
+```
+11.957% error rate
+
+(f)
+```{r}
+glm.fit = glm(mpg01 ~ cylinders + weight + displacement , data = Auto.train, family = binomial)
+glm.probs = predict(glm.fit, Auto.test, type = "response")
+glm.pred = rep(0, length(glm.probs))
+glm.pred[glm.probs > 0.5] = 1
+mean(glm.pred != mpg01.test)
+```
+14.13% error rate
+
+(g)
+```{r}
+library(class)
+train.X = as.matrix(Auto.train$cylinders, Auto.train$weight, Auto.train$displacement)
+test.X = as.matrix(Auto.test$cylinders, Auto.test$weight, Auto.test$displacement)
+train.mpg01 = Auto.train$mpg01
+train.mpg01
+set.seed(1)
+# KNN(k=1)
+knn.pred = knn(train.X, test.X, train.mpg01, k = 1)
+mean(knn.pred != mpg01.test)
+# KNN(k=10)
+knn.pred = knn(train.X, test.X, train.mpg01, k = 10)
+mean(knn.pred != mpg01.test)
+# KNN(k=100)
+knn.pred = knn(train.X, test.X, train.mpg01, k = 100)
+mean(knn.pred != mpg01.test)
+# KNN(k=200)
+knn.pred = knn(train.X, test.X, train.mpg01, k = 200)
+mean(knn.pred != mpg01.test)
+```
+When k=1, there is 11.413% error
+When k=10, there is 11.957% error
+When k=100, there is 5.4348% error
+When k=200, there is 5.4348% error
+
+As such, around 100 seems to be the best K.
+
+4.7.13
+```{r}
+library(MASS)
+Boston
+crime01 = rep(0, length(Boston$crim))
+crime01[Boston$crim > median(Boston$crim)] = 1
+Boston = data.frame(Boston, crime01)
+
+
+Btrain = 1:(dim(Boston)[1]/2)
+Btest = (dim(Boston)[1]/2 + 1):dim(Boston)[1]
+Boston.train = Boston[Btrain, ]
+Boston.test = Boston[Btest, ]
+crime01.test = crime01[Btest]
+```
+
+Logistic
+```{r}
+#glm.fit = glm(crime01 ~ . - crime01 - crim, data = Boston.train, family = binomial)
+#glm.probs = predict(glm.fit, Boston.test, type = "response")
+#glm.pred = rep(0, length(glm.probs))
+#glm.pred[glm.probs > 0.5] = 1
+#mean(glm.pred != crime01.test)
+#glm.fit = glm(crime01 ~ . - crime01 - crim - chas - tax, data = Boston.train, family = binomial)
+#glm.probs = predict(glm.fit, Boston.test, type = "response")
+#glm.pred = rep(0, length(glm.probs))
+#glm.pred[glm.probs > 0.5] = 1
+#mean(glm.pred != crime01.test)
+```
+18.18% error for complex models, 18.58% error for simple models
+
+LDA
+```{r}
+lda.fit = lda(crime01 ~ . - crime01 - crim, data = Boston.train)
+lda.pred = predict(lda.fit, Boston.test)
+mean(lda.pred$class != crime01.test)
+lda.fit = lda(crime01 ~ . - crime01 - crim - chas - tax - lstat - indus - age, 
+    data = Boston.train)
+lda.pred = predict(lda.fit, Boston.test)
+mean(lda.pred$class != crime01.test)
+```
+13.44% error for complex models, 11.86% error for simple models
+
+KNN
+```{r}
+library(class)
+train.BX = as.matrix(Boston.train$zn, Boston.train$indus, Boston.train$chas, Boston.train$nox, Boston.train$rm, Boston.train$age, Boston.train$dis, Boston.train$rad, Boston.train$tax, Boston.train$ptratio, Boston.train$black, 
+    Boston.train$lstat, Boston.train$medv)
+test.BX = as.matrix(Boston.test$zn, Boston.test$indus, Boston.test$chas, Boston.test$nox, Boston.test$rm, Boston.test$age, Boston.test$dis, Boston.test$rad, Boston.test$tax, Boston.test$ptratio, Boston.test$black,Boston.test$lstat, Boston.test$medv)
+train.crime01 = Boston.train$crime01
+set.seed(1)
+#(k=1)
+knn.pred = knn(train.BX, test.BX, train.crime01, k = 1)
+mean(knn.pred != crime01.test)
+#(k=10)
+knn.pred = knn(train.BX, test.BX, train.crime01, k = 10)
+mean(knn.pred != crime01.test)
+#(k=100)
+knn.pred = knn(train.BX, test.BX, train.crime01, k = 100)
+mean(knn.pred != crime01.test)
+```
+For K=1,k=10,k=100, error rate=64.43%
+
+## Theory assignment
+
+4.7.1
+
+Prove that the logistic function representation (4.2) and logit representation (4.3) for logistic regression model are equivalent.
+
+p(x)=exp{Bo+B1X}/(1+exp{Bo+B1X})
+1-exp{Bo+B1X}/(1+exp{Bo+B1X})=exp{Bo+B1X}/(1+exp{Bo+B1X})
+p(x)=exp{Bo+B1X}/(1+exp{Bo+B1X})/(1-exp{Bo+B1X}/(1+exp{Bo+B1X}))
+p(x)=exp{Bo+B1X}/(1+exp{Bo+B1X})/(1/(1+exp{Bo+B1X}))
+p(x)/(1-p(x))=exp{Bo+B1X}/(1+exp{Bo+B1X})
+
+4.7.8
+
+For KNN with k=1, the training error rate will always be 0%. Therefore, a KNN with an average error rate of 18% between training and test will have a test error rate of 36%. Since we're looking for the method with the lowest test error rate, I would choose the logistic regression, since it's error rate of 30% is lower.
+
+4.7.9
+
+(a)
+p(x)/(1-p(x))=0.37
+p(x)=0.37(1-p(x))
+p(x)=0.37-0.37p(x)
+1.37p(x)=0.37
+p(x)=0.27
+27% of people will default
+
+(b)
+p(x)=0.16
+p(x)/(1-p(x))=odds
+0.16/(1-0.16)=odds
+odds=0.19
