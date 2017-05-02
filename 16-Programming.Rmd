@@ -1,8 +1,90 @@
 # In-Class Programming Activity, Day 16
 
-Your work goes here ...
+```{r}
+library(mosaicData)
+library(ggplot2)
+library(ISLR)
+library(pls)
+library(glmnet)
+```
+
+# The knots
+```{r}
+my_knots <- function(x,k){
+  quantile(x, probs = (1:k)/(k+1), na.rm = TRUE, names = FALSE)
+}
+```
+
+# the basis set
+
+```{r}
+spline_model_matrix <- function(x, knot_locations){
+  MM <- cbind(1, x, x^2, x^3)
+  for (xi in knot_locations) {
+    new_vector <- ifelse(x<xi, 0, (x - xi)^3)
+    MM <- cbind(MM, new_vector)
+  }
+  return(MM)
+}
+```
+
+# finding the best linear combination
+
+```{r}
+#spline_coefs <- coef(lm(y ~ MM))
+
+fit_spline <- function(formula, k = 2, data = parent.frame()) {
+  y <- eval(formula[[2]], envir = data)
+  x <- eval(formula[[3]], envir = data)
+  knot_locations <- my_knots(x, k)
+  MM <- spline_model_matrix(x, knot_locations)
+  mod <- lm(y ~ MM -1)
+  res <- list(coef = coef(mod), knots = knot_locations, cov = vcov(mod))
+  class(res) <- "my_spline"
+  return(res)
+}
+```
+
+# the predict function
+
+```{r}
+predict.my_spline <- 
+  function(mod, newx, level = 0.95, intervals = c("none", "confidence", "prediction")){
+    intervals <- match.arg(intervals)
+    MM <- spline_model_matrix(newx, mod$knots)
+    vals <- MM %*% mod$coef
+    se <- sqrt(rowSums(MM%*% mod$cov * MM))
+    upper <- vals + (2* se)
+    lower <- vals - (2*se)
+    if(intervals == "none") return (vals)
+    #if(intervals == "confidence") return(vals, upper , lower)
+    #if(intervals == "prediction") return()
+    else return(NULL)
+  }
+```
 
 
+
+
+```{r}
+mod <- fit_spline(wage ~ age, data = Wage, k = 4)
+plot(wage ~ age, data = Wage, col = rgb(0,0,0,.02), pch = 20)
+x <- seq(20, 80, by = 1)
+y <- predict(mod, newx = x)
+lines(x, y, col = "red", lwd = 2)
+``````{r}
+fit_spline <- function(formula, k = 2, data = parent.frame()) {
+  y <- eval(formula[[2]], envir = data)
+  x <- eval(formula[[3]], envir = data)
+  knot_locations <- knots(x, k)
+  MM <- spline_model_matrix(x, knot_locations)
+  mod <- lm(y ~ MM - 1)
+  rse <- sum(resid(mod)^2)/mod$df.residual # updated to include rse
+  res <- list(coef = coef(mod), knots = knot_locations, rse= rse, cov = vcov(mod))
+  class(res) <- "my_spline"
+  return(res)
+}
+```
 
 ## Test statements
 
